@@ -2,6 +2,9 @@ import torch
 import torchvision
 from torchvision.transforms import v2
 
+# If a GPU is available
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 # download and nromalization of data and split between train and test sets
 transform = v2.Compose([
     v2.ToImage(),
@@ -48,7 +51,7 @@ class Net(nn.Module):
         return x
       
 net = Net()
-
+net = net.to(device)
 # setup of loss and optimization functions
 import torch.optim as optim
 
@@ -62,6 +65,8 @@ for epoch in range(10):  # loop over the dataset multiple times
     for i, data in enumerate(trainloader, 0):
         # get the inputs; data is a list of [inputs, labels]
         inputs, labels = data
+        inputs = inputs.to(device)
+        labels = labels.to(device)
 
         # zero the parameter gradients
         optimizer.zero_grad()
@@ -89,6 +94,8 @@ net.eval()
 with torch.no_grad():
     for data in testloader:
         images, labels = data
+        images = images.to(device)
+        labels = labels.to(device)
         
         outputs = net(images)
         
@@ -108,6 +115,9 @@ total_pred = {classname: 0 for classname in classes}
 with torch.no_grad():
     for data in testloader:
         images, labels = data
+        images = images.to(device)
+        labels = labels.to(device)
+        
         outputs = net(images)
         _, predictions = torch.max(outputs, 1)
         # collect the correct predictions for each class
